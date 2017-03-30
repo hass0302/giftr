@@ -14,7 +14,7 @@
 
 <body>
     <header class="bar bar-nav">
-        <a class="btn btn-link btn-nav pull-left" href="index.html"> <span class="icon icon-left-nav"></span> Back </a> <a href="#giftModal" class="btn btn-link btn-nav pull-right">
+        <a class="btn btn-link btn-nav pull-left" href="index.html"> <span class="icon icon-left-nav"></span> Back </a> <a id="addGiftBtn" href="#giftModal" class="btn btn-link btn-nav pull-right">
                 Add Idea
                 <span class="icon icon-plus"></span>
             </a>
@@ -22,27 +22,27 @@
     <div class="content">
         <!-- read through localStorage for contacts -->
         <ul class="table-view" id="gift-list">
-           <li class="table-view-cell media"> <span class="pull-right icon icon-trash midline"></span>
-    <!-- tap to process delete -->
-    <div class="media-body"> Gift Idea 1
-        <p>Best Buy</p>
-    </div>
-</li>
-<li class="table-view-cell media"> <span class="pull-right icon icon-trash midline"></span>
-    <!-- tap to process delete -->
-    <div class="media-body"> Gift Idea 2
-        <p><a href="#" target="_blank">http://www.example.com/</a></p>
-        <p>$15.99</p>
-    </div>
-</li>
-<li class="table-view-cell media"> <span class="pull-right icon icon-trash midline"></span>
-    <!-- tap to process delete -->
-    <div class="media-body"> Gift Idea 3
-        <p>LCBO</p>
-        <p><a href="#" target="_blank">http://www.lcbo.com/</a></p>
-        <p>$99.99</p>
-    </div>
-</li>
+            <li class="table-view-cell media"> <span class="pull-right icon icon-trash midline"></span>
+                <!-- tap to process delete -->
+                <div class="media-body"> Gift Idea 1
+                    <p>Best Buy</p>
+                </div>
+            </li>
+            <li class="table-view-cell media"> <span class="pull-right icon icon-trash midline"></span>
+                <!-- tap to process delete -->
+                <div class="media-body"> Gift Idea 2
+                    <p><a href="#" target="_blank">http://www.example.com/</a></p>
+                    <p>$15.99</p>
+                </div>
+            </li>
+            <li class="table-view-cell media"> <span class="pull-right icon icon-trash midline"></span>
+                <!-- tap to process delete -->
+                <div class="media-body"> Gift Idea 3
+                    <p>LCBO</p>
+                    <p><a href="#" target="_blank">http://www.lcbo.com/</a></p>
+                    <p>$99.99</p>
+                </div>
+            </li>
         </ul>
     </div>
     <div id="giftModal" class="modal">
@@ -55,16 +55,16 @@
                 <form class="input-group">
                     <div class="input-row">
                         <label>Gift idea</label>
-                        <input type="text" placeholder="idea" /> </div>
+                        <input type="text" id="inputIdea" placeholder="idea" /> </div>
                     <div class="input-row">
                         <label>Store</label>
-                        <input type="text" placeholder="where to find it" /> </div>
+                        <input type="text" id="inputStore" placeholder="where to find it" /> </div>
                     <div class="input-row">
                         <label>URL</label>
-                        <input type="url" placeholder="http://www.example.com/" /> </div>
-                   <div class="input-row">
+                        <input type="url" id="inputURL" placeholder="http://www.example.com/" /> </div>
+                    <div class="input-row">
                         <label>Cost</label>
-                        <input type="text" placeholder="$14.99" /> </div>
+                        <input type="text" id="inputCost" placeholder="$14.99" /> </div>
                 </form>
                 <p class="content-padded">
                     <button class="btn btn-block"> <span class="icon icon-close"></span> Cancel

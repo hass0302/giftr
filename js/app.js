@@ -1,6 +1,7 @@
 let app = {
     key: "giftr-hass0302"
     , currentContact: -1
+    , currentGift: -1
 };
 let data;
 document.addEventListener('DOMContentLoaded', function () {
@@ -12,21 +13,26 @@ window.addEventListener('push', function (ev) {
     let id = content.id;
     switch (id) {
     case "contact-list":
+        document.querySelector("#addPersonBtn").addEventListener("touchstart", function () {
+            app.currentContact = -1;
+            personModalScreen();
+        });
         DisplayList(0);
         break;
     case "gift-list":
+        document.querySelector("#addGiftBtn").addEventListener("touchstart", function () {
+            app.currentGift = -1;
+            giftModalScreen();
+        });
         DisplayList(1);
         break;
     default:
-        window.location.href("index.html");
-        console.log(id);
+        document.querySelector("#addPersonBtn").addEventListener("touchstart", function () {
+            app.currentContact = -1;
+            personModalScreen();
+        });
         DisplayList(0);
     }
-});
-document.querySelector("#addPersonBtn").addEventListener("touchend", function () {
-    app.currentContact = -1;
-    let modal = document.getElementById("personModal");
-    personModalScreen();
 });
 
 function getProfiles() {
@@ -83,8 +89,6 @@ function personModalScreen() {
     let inputName = document.getElementById("inputName");
     let inputDate = document.getElementById("inputDate");
     let modal = document.getElementById("personModal");
-    let errorFlagName, errorFlagDate = true;
-    // console.log(modal);
     if (app.currentContact < 0) {
         modal.querySelector(".title").innerHTML = "Person Add";
         inputDate.value = "";
@@ -102,34 +106,105 @@ function personModalScreen() {
     saveBtn.addEventListener("touchstart", saveCheck);
 }
 
+function giftModalScreen() {
+    console.log(app.currentGift);
+    let inputIdea = document.getElementById("inputIdea");
+    let inputStore = document.getElementById("inputStore");
+    let inputURL = document.getElementById("inputURL");
+    let inputCost = document.getElementById("inputCost");
+    let modal = document.getElementById("giftModal");
+    modal.getElementsByTagName('p')[0].innerHTML = data.people[app.currentContact].name;
+    if (app.currentGift < 0) {
+        modal.querySelector(".title").innerHTML = "Gift Add";
+        inputCost.value = "";
+        inputIdea.value = "";
+        inputURL.value = "";
+        inputStore.value = "";
+    }
+    else {
+        console.log(data.people[app.currentContact].ideas);
+        modal.querySelector(".title").innerHTML = "Gift Edit";
+        inputCost.value = data.people[app.currentContact].ideas[app.currentGift].cost;
+        inputIdea.value = data.people[app.currentContact].ideas[app.currentGift].idea;
+        inputURL.value = data.people[app.currentContact].ideas[app.currentGift].url;
+        inputStore.value = data.people[app.currentContact].ideas[app.currentGift].at;
+    }
+    let buttons = modal.getElementsByTagName("button");
+    let saveBtn = buttons[1];
+    let cancelBtn = buttons[0];
+    cancelBtn.addEventListener("touchstart", cancelCheck);
+    saveBtn.addEventListener("touchstart", console.log("beam"));
+}
+
 function cancelCheck() {
-    let modal = document.getElementById("personModal");
+    let modal;
+    if (document.getElementById("giftModal")) {
+        modal = document.getElementById("giftModal");
+        let inputIdea = document.getElementById("inputIdea");
+        let inputStore = document.getElementById("inputStore");
+        let inputURL = document.getElementById("inputURL");
+        let inputCost = document.getElementById("inputCost");
+        inputCost.value = "";
+        inputIdea.value = "";
+        inputURL.value = "";
+        inputStore.value = "";
+        app.currentGift = -1;
+    }
+    if (document.getElementById("personModal")) {
+        modal = document.getElementById("personModal");
+        let inputName = document.getElementById("inputName");
+        let inputDate = document.getElementById("inputDate");
+        inputDate.value = "";
+        inputName.value = "";
+        app.currentContact = -1;
+    }
     let cancelBtn = modal.getElementsByTagName("button")[0];
     console.log("cancel button");
     modal.classList.toggle("active");
-    app.currentContact = -1;
-    inputDate.value = "";
-    inputName.value = "";
     cancelBtn.removeEventListener("touchstart", cancelCheck);
 }
 
 function saveCheck() {
-    let modal = document.getElementById("personModal");
+    let modal;
+    if (document.getElementById("personModal")) {
+        modal = document.getElementById("personModal");
+        let inputName = document.getElementById("inputName");
+        let inputDate = document.getElementById("inputDate");
+        if (app.currentContact >= 0) {
+            data.people[app.currentContact].name = inputName.value;
+            data.people[app.currentContact].dob = inputDate.value;
+            saveBtn.removeEventListener("touchstart", saveCheck);
+        }
+        else {
+            data.people.push({
+                "name": inputName.value
+                , "dob": inputDate.value
+                , "id": Date.now()
+                , "ideas": []
+            });
+        }
+    }
+    if (document.getElementById("giftModal")) {
+        modal = document.getElementById("giftModal");
+        let inputIdea = document.getElementById("inputIdea");
+        let inputStore = document.getElementById("inputStore");
+        let inputURL = document.getElementById("inputURL");
+        let inputCost = document.getElementById("inputCost");
+        if (app.currentGift >= 0) {
+            data.people[app.currentContact].ideas[app.currentGift].idea = inputIdea.value;
+            saveBtn.removeEventListener("touchstart", saveCheck);
+        }
+        else {
+            data.people.push({
+                "name": inputName.value
+                , "dob": inputDate.value
+                , "id": Date.now()
+                , "ideas": []
+            });
+        }
+    }
     let saveBtn = modal.getElementsByTagName("button")[1];
     console.log("save button");
-    if (app.currentContact >= 0) {
-        data.people[app.currentContact].name = inputName.value;
-        data.people[app.currentContact].dob = inputDate.value;
-        saveBtn.removeEventListener("touchstart", saveCheck);
-    }
-    else {
-        data.people.push({
-            "name": inputName.value
-            , "dob": inputDate.value
-            , "id": Date.now()
-            , "ideas": []
-        });
-    }
     console.log(modal.className);
     modal.classList.toggle("active");
     inputDate.value = "";
@@ -163,8 +238,9 @@ function DisplayList(witch) {
             span.appendChild(a);
             a2.className += "navigate-right pull-right";
             a2.href = "gifts.html";
-            a2.addEventListener("touchstart", function (ev) {
-                console.log(ev.currentTarget.lastElementChild);
+            a2.setAttribute("data-id", index);
+            a2.addEventListener("touchstart", function () {
+                app.currentContact = index;
             });
             span2.className += "dob";
             span2.innerHTML = element.dob;
@@ -177,7 +253,7 @@ function DisplayList(witch) {
     else {
         let ul = document.getElementById("gift-list");
         ul.innerHTML = "";
-        data.people[0].ideas.forEach(function (element) {
+        data.people[app.currentContact].ideas.forEach(function (element, index) {
             let li = document.createElement("li");
             let a = document.createElement('a');
             let span = document.createElement('span');
@@ -186,8 +262,17 @@ function DisplayList(witch) {
             let cost = document.createElement('p');
             li.className += "table-view-cell media";
             span.className = "pull-right icon icon-trash midline";
+            span.addEventListener("touchstart", function () {
+                data.people[app.currentContact].ideas.splice(index, 1);
+                DisplayList(1);
+            })
             div.className += "media-body";
             div.innerHTML += element.idea;
+            div.addEventListener("touchstart", function () {
+                app.currentGift = index;
+                document.getElementById("giftModal").classList.toggle("active");
+                giftModalScreen();
+            });
             where.appendChild(a);
             cost.innerHTML = element.cost;
             a.href = element.url;
@@ -197,7 +282,6 @@ function DisplayList(witch) {
             div.appendChild(cost);
             li.appendChild(span);
             li.appendChild(div);
-            //    console.log(li);
             ul.appendChild(li);
         });
     }
