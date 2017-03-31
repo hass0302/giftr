@@ -228,6 +228,8 @@ function DisplayList(witch) {
         let ul = document.getElementById("contact-list");
         ul.innerHTML = "";
         data.people.forEach(function (element, index) {
+            let displayDate = moment(element.dob);
+            console.log(displayDate.format("MMM do"));
             let li = document.createElement("li");
             let a = document.createElement('a');
             let a2 = document.createElement('a');
@@ -251,7 +253,7 @@ function DisplayList(witch) {
                 app.currentContact = index;
             });
             span2.className += "dob";
-            span2.innerHTML = element.dob;
+            span2.innerHTML = displayDate.format("MMM do");
             li.appendChild(span);
             a2.appendChild(span2);
             li.appendChild(a2);
