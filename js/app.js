@@ -5,8 +5,12 @@ let app = {
 };
 let data;
 document.addEventListener('DOMContentLoaded', function () {
-    localStorage.removeItem(app.key);
+    //localStorage.removeItem(app.key);
     getProfiles();
+    document.querySelector("#addPersonBtn").addEventListener("touchstart", function () {
+        app.currentContact = -1;
+        personModalScreen();
+    });
 });
 window.addEventListener('push', function (ev) {
     let content = ev.currentTarget.document.querySelector(".table-view");
@@ -15,23 +19,19 @@ window.addEventListener('push', function (ev) {
     case "contact-list":
         document.querySelector("#addPersonBtn").addEventListener("touchstart", function () {
             app.currentContact = -1;
+            console.log(app.currentContact);
+            console.log("it goes to 1");
             personModalScreen();
         });
         DisplayList(0);
         break;
     case "gift-list":
-        document.querySelector("#addGiftBtn").addEventListener("touchstart", function () {
-            app.currentGift = -1;
-            giftModalScreen();
-        });
         DisplayList(1);
         break;
     default:
-        document.querySelector("#addPersonBtn").addEventListener("touchstart", function () {
-            app.currentContact = -1;
-            personModalScreen();
-        });
-        DisplayList(0);
+        console.log("it goes to 3");
+        //        window.location.reload("index.html");
+        //        DisplayList(0);
     }
 });
 
@@ -107,12 +107,12 @@ function personModalScreen() {
 }
 
 function giftModalScreen() {
-    console.log(app.currentGift);
+    console.log("inside gift modal screen");
+    let modal = document.getElementById("giftModal");
     let inputIdea = document.getElementById("inputIdea");
     let inputStore = document.getElementById("inputStore");
     let inputURL = document.getElementById("inputURL");
     let inputCost = document.getElementById("inputCost");
-    let modal = document.getElementById("giftModal");
     modal.getElementsByTagName('p')[0].innerHTML = data.people[app.currentContact].name;
     if (app.currentGift < 0) {
         modal.querySelector(".title").innerHTML = "Gift Add";
@@ -133,7 +133,7 @@ function giftModalScreen() {
     let saveBtn = buttons[1];
     let cancelBtn = buttons[0];
     cancelBtn.addEventListener("touchstart", cancelCheck);
-    saveBtn.addEventListener("touchstart", console.log("beam"));
+    saveBtn.addEventListener("touchstart", saveCheck);
 }
 
 function cancelCheck() {
@@ -166,6 +166,7 @@ function cancelCheck() {
 
 function saveCheck() {
     let modal;
+    // if its in the person page
     if (document.getElementById("personModal")) {
         modal = document.getElementById("personModal");
         let inputName = document.getElementById("inputName");
@@ -173,7 +174,6 @@ function saveCheck() {
         if (app.currentContact >= 0) {
             data.people[app.currentContact].name = inputName.value;
             data.people[app.currentContact].dob = inputDate.value;
-            saveBtn.removeEventListener("touchstart", saveCheck);
         }
         else {
             data.people.push({
@@ -183,36 +183,44 @@ function saveCheck() {
                 , "ideas": []
             });
         }
+        let saveBtn = modal.getElementsByTagName("button")[1];
+        saveBtn.removeEventListener("touchstart", saveCheck);
+        inputDate.value = "";
+        inputName.value = "";
+        app.currentContact = -1;
+        DisplayList(0);
     }
-    if (document.getElementById("giftModal")) {
+    // If its in the Gift page
+    if (document.querySelector("#giftModal")) {
         modal = document.getElementById("giftModal");
+        let saveBtn = modal.getElementsByTagName("button")[1];
         let inputIdea = document.getElementById("inputIdea");
         let inputStore = document.getElementById("inputStore");
         let inputURL = document.getElementById("inputURL");
         let inputCost = document.getElementById("inputCost");
         if (app.currentGift >= 0) {
+            data.people[app.currentContact].ideas[app.currentGift].cost = inputCost.value;
             data.people[app.currentContact].ideas[app.currentGift].idea = inputIdea.value;
-            saveBtn.removeEventListener("touchstart", saveCheck);
+            data.people[app.currentContact].ideas[app.currentGift].url = inputURL.value;
+            data.people[app.currentContact].ideas[app.currentGift].at = inputStore.value;
         }
         else {
-            data.people.push({
-                "name": inputName.value
-                , "dob": inputDate.value
-                , "id": Date.now()
-                , "ideas": []
+            data.people[app.currentContact].ideas.push({
+                "idea": inputIdea.value
+                , "cost": inputCost.value
+                , "at": inputStore.value
+                , "url": inputURL.value
             });
         }
+        app.currentGift = -1;
+        DisplayList(1);
     }
     let saveBtn = modal.getElementsByTagName("button")[1];
-    console.log("save button");
-    console.log(modal.className);
     modal.classList.toggle("active");
-    inputDate.value = "";
-    inputName.value = "";
-    app.currentContact = -1;
-    console.dir(data.people);
-    DisplayList(0);
     saveBtn.removeEventListener("touchstart", saveCheck);
+    localStorage.removeItem(app.key);
+    localStorage.setItem(app.key, JSON.stringify(data));
+    data = JSON.parse(localStorage.getItem(app.key));
 }
 
 function DisplayList(witch) {
@@ -251,6 +259,11 @@ function DisplayList(witch) {
         });
     }
     else {
+        document.querySelector("#addGiftBtn").addEventListener("touchstart", function () {
+            app.currentGift = -1;
+            //console.log("it goes to 2");
+            giftModalScreen();
+        });
         let ul = document.getElementById("gift-list");
         ul.innerHTML = "";
         data.people[app.currentContact].ideas.forEach(function (element, index) {
@@ -264,6 +277,8 @@ function DisplayList(witch) {
             span.className = "pull-right icon icon-trash midline";
             span.addEventListener("touchstart", function () {
                 data.people[app.currentContact].ideas.splice(index, 1);
+                localStorage.removeItem(app.key);
+                localStorage.setItem(app.key, JSON.stringify(data));
                 DisplayList(1);
             })
             div.className += "media-body";
